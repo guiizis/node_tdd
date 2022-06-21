@@ -3,11 +3,12 @@ import { HttpRequest, HttpResponse } from '../protocols/http'
 
 export class SignupController {
   handle (httpRequest: HttpRequest): HttpResponse {
-    if (!httpRequest.body.email) {
-      return badRequest('email')
-    }
-    if (!httpRequest.body.name) {
-      return badRequest('name')
+    const requiredFields: string[] = ['name', 'email']
+
+    for (const field of requiredFields) {
+      if (!httpRequest.body[field]) {
+        return badRequest(field)
+      }
     }
   }
 }
