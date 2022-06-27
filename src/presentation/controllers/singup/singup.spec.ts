@@ -57,6 +57,26 @@ describe('SingUp Controller', () => {
     expect(httpResponse.body).toEqual(new MissingParamError('name'))
   })
 
+  it('Should return 500 if addAccount throws', () => {
+    const { sut, addAccountStub } = makeSUT()
+
+    jest.spyOn(addAccountStub, 'add').mockImplementation(() => {
+      throw new Error()
+    })
+
+    const htppRequest = {
+      body: {
+        name: 'any_name',
+        email: 'invalid_email@mail.com',
+        password: 'any_password',
+        passwordConfirmation: 'any_password'
+      }
+    }
+    const httpResponse = sut.handle(htppRequest)
+    expect(httpResponse.statusCode).toBe(500)
+    expect(httpResponse.body).toEqual(new ServerError())
+  })
+
   it('Should return 500 if emailValidator throws', () => {
     const { sut, emailValidatorStub } = makeSUT()
 
