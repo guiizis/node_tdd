@@ -1,3 +1,5 @@
+import { AccountModel } from '../../domain/models/account'
+import { AddAccount, AddAccountModel } from '../../domain/useCases/addAccount'
 import { InvalidParamError, MissingParamError, ServerError } from '../errors/index'
 import { EmailValidator } from '../protocols'
 import { SignupController } from './singup'
@@ -5,6 +7,7 @@ import { SignupController } from './singup'
 interface SutTypes {
   sut: SignupController
   emailValidatorStub: EmailValidator
+  addAccountStub: AddAccount
 }
 
 const makeEmailValidator = (): EmailValidator => {
@@ -16,12 +19,28 @@ const makeEmailValidator = (): EmailValidator => {
   return new EmailValidatorStub()
 }
 
+const makeAddAccount = (): AddAccount => {
+  class AddAccountStub implements AddAccount {
+    add (account: AddAccountModel): AccountModel {
+      return {
+        id: 'valid_id',
+        name: 'valid_id',
+        email: 'valid_email@email.com',
+        password: 'valid_password'
+      }
+    }
+  }
+  return new AddAccountStub()
+}
+
 const makeSUT = (): SutTypes => {
   const emailValidatorStub = makeEmailValidator()
-  const sut = new SignupController(emailValidatorStub)
+  const addAccountStub = makeAddAccount()
+  const sut = new SignupController(emailValidatorStub, addAccountStub)
   return {
     sut,
-    emailValidatorStub
+    emailValidatorStub,
+    addAccountStub
   }
 }
 
@@ -93,6 +112,27 @@ describe('SingUp Controller', () => {
     }
     sut.handle(htppRequest)
     expect(isValidSpy).toHaveBeenCalledWith(htppRequest.body.email)
+  })
+
+  it('Should call email addAccount with correct values', () => {
+    const { sut, addAccountStub } = makeSUT()
+
+    const addSpy = jest.spyOn(addAccountStub, 'add')
+
+    const htppRequest = {
+      body: {
+        name: 'any_name',
+        email: 'invalid_email@mail.com',
+        password: 'any_password',
+        passwordConfirmation: 'any_password'
+      }
+    }
+    sut.handle(htppRequest)
+    expect(addSpy).toHaveBeenCalledWith({
+      name: 'any_name',
+      email: 'invalid_email@mail.com',
+      password: 'any_password'
+    })
   })
 
   it('Should return 400 if no email is provided', () => {
