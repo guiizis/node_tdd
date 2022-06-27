@@ -136,4 +136,19 @@ describe('SingUp Controller', () => {
     expect(httpResponse.statusCode).toBe(400)
     expect(httpResponse.body).toEqual(new MissingParamError('passwordConfirmation'))
   })
+
+  it('Should return 400 if password confirmation dosent match password', () => {
+    const { sut } = makeSUT()
+    const htppRequest = {
+      body: {
+        name: 'any_name',
+        email: 'any_email@mail.com',
+        password: 'any_password',
+        passwordConfirmation: 'any_password_error'
+      }
+    }
+    const httpResponse = sut.handle(htppRequest)
+    expect(httpResponse.statusCode).toBe(400)
+    expect(httpResponse.body).toEqual(new InvalidParamError('password Confirmation'))
+  })
 })
