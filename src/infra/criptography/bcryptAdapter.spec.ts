@@ -1,14 +1,14 @@
-import bcrypt from 'bcrypt'
+/* eslint-disable @typescript-eslint/return-await */
 import { BcryptAdapter } from './bCryptAdapter'
-
-const salt = 12
+import bcrypt from 'bcrypt'
 
 jest.mock('bcrypt', () => ({
   async hash (): Promise<string> {
-    return await new Promise(resolve => resolve('hashed_value'))
+    return new Promise(resolve => resolve('hashed_value'))
   }
 }))
 
+const salt = 12
 const makeSUT = (): BcryptAdapter => {
   const sut = new BcryptAdapter(salt)
   return sut
@@ -26,5 +26,13 @@ describe('Bcrypt Adapater', () => {
     const sut = makeSUT()
     const hash = await sut.encrypt('any_value')
     expect(hash).toBe('hashed_value')
+  })
+
+  it('should return a throw if bcrypt throws', async () => {
+    const sut = makeSUT()
+    // @ts-ignore
+    jest.spyOn(bcrypt, 'hash').mockReturnValueOnce(new Promise((resolve, reject) => reject(new Error())))
+    const promise = sut.encrypt('any_value')
+    await expect(promise).rejects.toThrow()
   })
 })
