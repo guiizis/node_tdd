@@ -1,4 +1,4 @@
-import { Encrypter } from '../../protocols/encrypter'
+import { Encrypter } from './dbAddAccountProtocols'
 import { DBAddAccount } from './dbAddAccount'
 
 /* eslint-disable @typescript-eslint/return-await */
@@ -39,7 +39,7 @@ describe('DBAddAccount UseCase', () => {
     await sut.add(accountData)
     expect(encryptSpy).toHaveBeenCalledWith('valid_password')
   })
- 
+
   it('should throws if encrypter throw', async () => {
     const { sut, encrypterStub } = makeSUT()
     jest.spyOn(encrypterStub, 'encrypt').mockReturnValueOnce(new Promise((resolve, reject) => reject(new Error())))
