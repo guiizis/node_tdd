@@ -1,7 +1,9 @@
 {
     "extends": "standard-with-typescript",
     "rules": {
-        "@typescript-eslint/strict-boolean-expressions": 0
+        "@typescript-eslint/strict-boolean-expressions": 0,
+        "no-return-await": "off",
+        "@typescript-eslint/return-await": "error"
     },
     "parserOptions": {
         "project": "./tsconfig.json"
