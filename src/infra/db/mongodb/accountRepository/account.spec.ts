@@ -1,12 +1,13 @@
-import { mongoHelper } from '../helpers/mongoHelper'
+import { MongoHelper } from '../helpers/mongoHelper'
+import { AccountMongoRepository } from './account'
 
 describe('account test mongo', () => {
   beforeAll(async () => {
-    await mongoHelper.connect(process.env.MONGO_URL)
+    await MongoHelper.connect(process.env.MONGO_URL)
   })
 
   afterAll(async () => {
-    await mongoHelper.disconnect()
+    await MongoHelper.disconnect()
   })
 
   it('should return an account on success', async () => {
