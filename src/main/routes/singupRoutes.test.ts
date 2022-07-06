@@ -21,9 +21,9 @@ describe('singUp routes', () => {
       .post('/api/singup')
       .send({
         name: 'valid_name',
-        email: 'valid_email',
+        email: 'valid_email@mail.com',
         password: 'valid_password',
-        passwordConfirmation: 'valid_password_confirmation'
+        passwordConfirmation: 'valid_password'
       })
       .expect(200)
   })
