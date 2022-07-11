@@ -18,8 +18,12 @@ describe('Log Test', () => {
     await errorCollection.deleteMany({})
   })
 
+  const makeSUT = (): LogMongoRepository => {
+    return new LogMongoRepository()
+  }
+
   it('should create an error log on success', async () => {
-    const sut = new LogMongoRepository()
+    const sut = makeSUT()
     await sut.logError('any_error')
     const count = await errorCollection.countDocuments()
     expect(count).toBe(1)
