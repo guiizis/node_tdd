@@ -2,9 +2,20 @@ import { MissingParamError } from '../../errors'
 import { badRequest } from '../../helper/httpHelpers'
 import { LoginController } from './login'
 
+interface SutTypes {
+  sut: LoginController
+}
+
+const makeSUT = (): SutTypes => {
+  const sut = new LoginController()
+  return {
+    sut
+  }
+}
+
 describe('Login Controller', () => {
   it('should return 400 if no email is provided', async () => {
-    const sut = new LoginController()
+    const { sut } = makeSUT()
     const httpRequest = {
       body: {
         password: 'test_password'
@@ -13,9 +24,9 @@ describe('Login Controller', () => {
     const httpResponse = await sut.handle(httpRequest)
     expect(httpResponse).toEqual(badRequest(new MissingParamError('email')))
   })
-  
+
   it('should return 400 if no password is provided', async () => {
-    const sut = new LoginController()
+    const { sut } = makeSUT()
     const httpRequest = {
       body: {
         email: 'any_email@email.com'
