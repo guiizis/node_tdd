@@ -1,11 +1,9 @@
-import { Authentication } from '../../../domain/useCases/authentication'
 import { InvalidParamError, MissingParamError } from '../../errors'
 import { badRequest, serverError, unauthorized } from '../../helper/httpHelpers'
-import { Controller, HttpRequest, HttpResponse } from '../../protocols'
-import { EmailValidator } from '../singup/singupProtocols'
+import { Controller, HttpRequest, HttpResponse, EmailValidator, Authentication } from './loginProtocols'
 
 export class LoginController implements Controller {
-  constructor(private readonly emailValidator: EmailValidator, private readonly authenticator: Authentication) { }
+  constructor (private readonly emailValidator: EmailValidator, private readonly authenticator: Authentication) { }
 
   async handle (httpRequest: HttpRequest): Promise<HttpResponse> {
     try {
