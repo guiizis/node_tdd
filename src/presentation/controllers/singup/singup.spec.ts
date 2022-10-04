@@ -14,7 +14,7 @@ interface SutTypes {
 
 const makeEmailValidator = (): EmailValidator => {
   class EmailValidatorStub implements EmailValidator {
-    isValid(email: string): boolean {
+    isValid (email: string): boolean {
       return true
     }
   }
@@ -208,5 +208,12 @@ describe('SingUp Controller', () => {
     const httpRequest = makeFakeRequest()
     await sut.handle(httpRequest)
     expect(validationSpy).toHaveBeenCalledWith(httpRequest.body)
+  })
+
+  it('Should return 400 if validate throws', async () => {
+    const { sut, validationStub } = makeSUT()
+    jest.spyOn(validationStub, 'validate').mockReturnValueOnce(new MissingParamError('missig field'))
+    const httpResponse = await sut.handle(makeFakeRequest())
+    expect(httpResponse).toEqual(badRequest(new MissingParamError('missig field')))
   })
 })
