@@ -70,19 +70,6 @@ const makeSUT = (): SutTypes => {
 }
 
 describe('SingUp Controller', () => {
-  it('Should return 400 if no name is provided', async () => {
-    const { sut } = makeSUT()
-    const httpRequest = {
-      body: {
-        email: 'test@example.com',
-        password: 'any_password',
-        passwordConfirmation: 'any_password'
-      }
-    }
-    const httpResponse = await sut.handle(httpRequest)
-    expect(httpResponse).toEqual(badRequest(new MissingParamError('name')))
-  })
-
   it('Should return 500 if addAccount throws', async () => {
     const { sut, addAccountStub } = makeSUT()
 
@@ -139,45 +126,6 @@ describe('SingUp Controller', () => {
       email: 'invalid_email@mail.com',
       password: 'any_password'
     })
-  })
-
-  it('Should return 400 if no email is provided', async () => {
-    const { sut } = makeSUT()
-    const httpRequest = {
-      body: {
-        name: 'any_name',
-        password: 'any_password',
-        passwordConfirmation: 'any_password'
-      }
-    }
-    const httpResponse = await sut.handle(httpRequest)
-    expect(httpResponse).toEqual(badRequest(new MissingParamError('email')))
-  })
-
-  it('Should return 400 if no password is provided', async () => {
-    const { sut } = makeSUT()
-    const httpRequest = {
-      body: {
-        name: 'any_name',
-        email: 'any_email@mail.com',
-        passwordConfirmation: 'any_password'
-      }
-    }
-    const httpResponse = await sut.handle(httpRequest)
-    expect(httpResponse).toEqual(badRequest(new MissingParamError('password')))
-  })
-
-  it('Should return 400 if no password confirmation is provided', async () => {
-    const { sut } = makeSUT()
-    const httpRequest = {
-      body: {
-        name: 'any_name',
-        email: 'any_email@mail.com',
-        password: 'any_password'
-      }
-    }
-    const httpResponse = await sut.handle(httpRequest)
-    expect(httpResponse).toEqual(badRequest(new MissingParamError('passwordConfirmation')))
   })
 
   it('Should return 400 if password confirmation dosent match password', async () => {
