@@ -128,20 +128,6 @@ describe('SingUp Controller', () => {
     })
   })
 
-  it('Should return 400 if password confirmation dosent match password', async () => {
-    const { sut } = makeSUT()
-    const httpRequest = {
-      body: {
-        name: 'any_name',
-        email: 'any_email@mail.com',
-        password: 'any_password',
-        passwordConfirmation: 'fake_password'
-      }
-    }
-    const httpResponse = await sut.handle(httpRequest)
-    expect(httpResponse).toEqual(badRequest(new InvalidParamError('password Confirmation')))
-  })
-
   it('Should return 200 if valid data was passed', async () => {
     const { sut } = makeSUT()
     const httpResponse = await sut.handle(makeFakeRequest())
