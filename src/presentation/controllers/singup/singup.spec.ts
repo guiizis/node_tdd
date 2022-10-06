@@ -1,24 +1,14 @@
 /* eslint-disable @typescript-eslint/return-await */
-import { InvalidParamError, MissingParamError, ServerError } from '../../errors/index'
+import { MissingParamError, ServerError } from '../../errors/index'
 import { HttpRequest } from '../../../presentation/protocols'
-import { EmailValidator, AccountModel, AddAccount, AddAccountModel, Validation } from '../singup/singupProtocols'
+import { AccountModel, AddAccount, AddAccountModel, Validation } from '../singup/singupProtocols'
 import { SignupController } from './singup'
 import { badRequest, ok, serverError } from '../../helper/httpHelpers'
 
 interface SutTypes {
   sut: SignupController
-  emailValidatorStub: EmailValidator
   addAccountStub: AddAccount
   validationStub: Validation
-}
-
-const makeEmailValidator = (): EmailValidator => {
-  class EmailValidatorStub implements EmailValidator {
-    isValid (email: string): boolean {
-      return true
-    }
-  }
-  return new EmailValidatorStub()
 }
 
 const makeFakeRequest = (): HttpRequest => ({
@@ -57,13 +47,11 @@ const makeValidation = (): Validation => {
 }
 
 const makeSUT = (): SutTypes => {
-  const emailValidatorStub = makeEmailValidator()
   const addAccountStub = makeAddAccount()
   const validationStub = makeValidation()
-  const sut = new SignupController(emailValidatorStub, addAccountStub, validationStub)
+  const sut = new SignupController(addAccountStub, validationStub)
   return {
     sut,
-    emailValidatorStub,
     addAccountStub,
     validationStub
   }
@@ -82,39 +70,13 @@ describe('SingUp Controller', () => {
     expect(httpResponse).toEqual(serverError(new ServerError(null)))
   })
 
-  it('Should return 500 if emailValidator throws', async () => {
-    const { sut, emailValidatorStub } = makeSUT()
-
-    jest.spyOn(emailValidatorStub, 'isValid').mockImplementation(() => {
-      throw new Error()
-    })
-
-    const httpRequest = makeFakeRequest()
-    const httpResponse = await sut.handle(httpRequest)
-    expect(httpResponse).toEqual(serverError(new ServerError(null)))
+  it('Should return 200 if valid data was passed', async () => {
+    const { sut } = makeSUT()
+    const httpResponse = await sut.handle(makeFakeRequest())
+    expect(httpResponse).toEqual(ok(makeFakeAccount()))
   })
 
-  it('Should return 400 if a invalid email is provided', async () => {
-    const { sut, emailValidatorStub } = makeSUT()
-
-    jest.spyOn(emailValidatorStub, 'isValid').mockReturnValueOnce(false)
-
-    const httpRequest = makeFakeRequest()
-    const httpResponse = await sut.handle(httpRequest)
-    expect(httpResponse).toEqual(badRequest(new InvalidParamError('email')))
-  })
-
-  it('Should call email validator with correct email', async () => {
-    const { sut, emailValidatorStub } = makeSUT()
-
-    const isValidSpy = jest.spyOn(emailValidatorStub, 'isValid')
-
-    const httpRequest = makeFakeRequest()
-    await sut.handle(httpRequest)
-    expect(isValidSpy).toHaveBeenCalledWith(httpRequest.body.email)
-  })
-
-  it('Should call email addAccount with correct values', async () => {
+  it('Should call addAccount with correct values', async () => {
     const { sut, addAccountStub } = makeSUT()
 
     const addSpy = jest.spyOn(addAccountStub, 'add')
@@ -126,26 +88,6 @@ describe('SingUp Controller', () => {
       email: 'invalid_email@mail.com',
       password: 'any_password'
     })
-  })
-
-  it('Should return 400 if password confirmation dosent match password', async () => {
-    const { sut } = makeSUT()
-    const httpRequest = {
-      body: {
-        name: 'any_name',
-        email: 'any_email@mail.com',
-        password: 'any_password',
-        passwordConfirmation: 'fake_password'
-      }
-    }
-    const httpResponse = await sut.handle(httpRequest)
-    expect(httpResponse).toEqual(badRequest(new InvalidParamError('password Confirmation')))
-  })
-
-  it('Should return 200 if valid data was passed', async () => {
-    const { sut } = makeSUT()
-    const httpResponse = await sut.handle(makeFakeRequest())
-    expect(httpResponse).toEqual(ok(makeFakeAccount()))
   })
 
   it('Should call validation with correct values', async () => {
