@@ -38,7 +38,7 @@ const makeLoadAccountByEmailRepositoryStub = (): LoadAccountByEmailRepository =>
 const makeTokenGeneratorStub = (): TokenGenerator => {
   class TokenGeneratorStub implements TokenGenerator {
     async generate (id: string): Promise<string> {
-      return await new Promise(resolve => resolve('anny_token'))
+      return await new Promise(resolve => resolve('any_token'))
     }
   }
   return new TokenGeneratorStub()
@@ -121,5 +121,11 @@ describe('dbAuthentication useCase', () => {
     jest.spyOn(tokenGenerator, 'generate').mockReturnValueOnce(new Promise((resolve, reject) => reject(new Error())))
     const promise = sut.auth(makeFakeAuthentication())
     await expect(promise).rejects.toThrow()
+  })
+
+  it('Should call tokenGenerator with correct id', async () => {
+    const { sut } = makeSut()
+    const accessToken = await sut.auth(makeFakeAuthentication())
+    expect(accessToken).toBe('any_token')
   })
 })
