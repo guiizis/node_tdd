@@ -63,7 +63,7 @@ describe('Bcrypt Adapater', () => {
     const sut = makeSUT()
     // @ts-ignore
     jest.spyOn(bcrypt, 'compare').mockReturnValueOnce(new Promise((resolve, reject) => reject(new Error())))
-    const promise = await sut.compare('any_value', 'any_hash')
+    const promise = sut.compare('any_value', '')
     await expect(promise).rejects.toThrow()
   })
 })
