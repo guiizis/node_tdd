@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/return-await */
 import { MissingParamError, ServerError } from '../../errors/index'
-import { HttpRequest } from '../../../presentation/protocols'
-import { AccountModel, AddAccount, AddAccountModel, Validation } from '../singup/singupProtocols'
-import { SignupController } from './singup'
+import { HttpRequest } from '../../protocols'
+import { AccountModel, AddAccount, AddAccountModel, Validation } from './singupProtocolsController'
+import { SignupController } from './singupController'
 import { badRequest, ok, serverError } from '../../helper/http/httpHelpers'
 
 interface SutTypes {

@@ -1,9 +1,10 @@
+import { LoadAccountByEmailRepository } from '../../protocols/db/account/loadAccountByEmailRepository'
+import { UpdateAccessTokenRepository } from '../../protocols/db/account/UpdateAccessTokenRepository'
 import { DbAuthentication } from './dbAuthentication'
 import {
   HashComparer,
   Encrypter,
-  LoadAccountByEmailRepository,
-  UpdateAccessTokenRepository,
+ 
   AccountModel,
   AuthenticationModel
 } from './dbAuthenticationProtocols'
