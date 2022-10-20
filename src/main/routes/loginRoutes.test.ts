@@ -1,6 +1,10 @@
+import { hash } from 'bcrypt'
+import { Collection } from 'mongodb'
 import request from 'supertest'
 import { MongoHelper } from '../../infra/db/mongodb/helpers/mongoHelper'
 import app from '../config/app'
+
+let accountCollection: Collection
 
 describe('login routes', () => {
   beforeAll(async () => {
@@ -12,7 +16,7 @@ describe('login routes', () => {
   })
 
   beforeEach(async () => {
-    const accountCollection = await MongoHelper.getCollection('accounts')
+    accountCollection = await MongoHelper.getCollection('accounts')
     await accountCollection.deleteMany({})
   })
 
@@ -27,10 +31,8 @@ describe('login routes', () => {
       })
       .expect(200)
   })
-})
-
-describe('POST/SINGUP', () => {
-  it('should return 200 on singup', async () => {
+  
+  it('POST/SINGUP should return 200 on singup', async () => {
     await request(app)
       .post('/api/singup')
       .send({
@@ -41,4 +43,23 @@ describe('POST/SINGUP', () => {
       })
       .expect(200)
   })
+
+  it('POST/LOGIN should return 200 on login', async () => {
+    const password = await hash('123', 12)
+
+    await accountCollection.insertOne({
+      name: 'valid_name',
+      email: 'valid_email@mail.com',
+      password
+    })
+
+    await request(app)
+      .post('/api/login')
+      .send({
+        email: 'valid_email@mail.com',
+        password: '123'
+      })
+      .expect(200)
+  })
 })
+
