@@ -61,5 +61,23 @@ describe('login routes', () => {
       })
       .expect(200)
   })
+
+  it('POST/LOGIN should return 401 on login fail', async () => {
+    const password = await hash('123', 12)
+
+    await accountCollection.insertOne({
+      name: 'valid_name',
+      email: 'valid_email@mail.com',
+      password
+    })
+
+    await request(app)
+      .post('/api/login')
+      .send({
+        email: 'valid_email@mail.com',
+        password: '401_test'
+      })
+      .expect(401)
+  })
 })
 
