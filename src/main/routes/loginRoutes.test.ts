@@ -2,7 +2,7 @@ import request from 'supertest'
 import { MongoHelper } from '../../infra/db/mongodb/helpers/mongoHelper'
 import app from '../config/app'
 
-describe('singUp routes', () => {
+describe('login routes', () => {
   beforeAll(async () => {
     await MongoHelper.connect(process.env.MONGO_URL)
   })
@@ -17,6 +17,20 @@ describe('singUp routes', () => {
   })
 
   it('should return an account on success', async () => {
+    await request(app)
+      .post('/api/singup')
+      .send({
+        name: 'valid_name',
+        email: 'valid_email@mail.com',
+        password: 'valid_password',
+        passwordConfirmation: 'valid_password'
+      })
+      .expect(200)
+  })
+})
+
+describe('POST/SINGUP', () => {
+  it('should return 200 on singup', async () => {
     await request(app)
       .post('/api/singup')
       .send({
