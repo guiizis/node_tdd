@@ -1,0 +1,20 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.makeSingUpController = void 0;
+const dbAddAccount_1 = require("../../../data/useCases/addAccount/dbAddAccount");
+const bCryptAdapter_1 = require("../../../infra/criptography/bcryptAdapter/bCryptAdapter");
+const accountMongoRepository_1 = require("../../../infra/db/mongodb/account/accountMongoRepository");
+const logMongoRepository_1 = require("../../../infra/db/mongodb/log/logMongoRepository");
+const singupController_1 = require("../../../presentation/controllers/singup/singupController");
+const logControllerDecorator_1 = require("../../decorators/logControllerDecorator");
+const singupValidationFactory_1 = require("./singupValidationFactory");
+const makeSingUpController = () => {
+    const salt = 12;
+    const bcryptAdapter = new bCryptAdapter_1.BcryptAdapter(salt);
+    const accountMongoRepository = new accountMongoRepository_1.AccountMongoRepository();
+    const dbAddAccount = new dbAddAccount_1.DBAddAccount(bcryptAdapter, accountMongoRepository);
+    const singUpController = new singupController_1.SignupController(dbAddAccount, (0, singupValidationFactory_1.makeSingUpValidation)());
+    const logMongoRepository = new logMongoRepository_1.LogMongoRepository();
+    return new logControllerDecorator_1.LogControllerDecorator(singUpController, logMongoRepository);
+};
+exports.makeSingUpController = makeSingUpController;
