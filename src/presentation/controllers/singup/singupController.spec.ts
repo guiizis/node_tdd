@@ -4,11 +4,13 @@ import { HttpRequest } from '../../protocols'
 import { AccountModel, AddAccount, AddAccountModel, Validation } from './singupProtocolsController'
 import { SignupController } from './singupController'
 import { badRequest, ok, serverError } from '../../helper/http/httpHelpers'
+import { Authentication, AuthenticationModel } from '../login/loginProtocolsController'
 
 interface SutTypes {
   sut: SignupController
   addAccountStub: AddAccount
   validationStub: Validation
+  authenticationStub: Authentication
 }
 
 const makeFakeRequest = (): HttpRequest => ({
@@ -26,6 +28,15 @@ const makeFakeAccount = (): AccountModel => ({
   email: 'valid_email@mail.com',
   password: 'valid_password'
 })
+
+const makeAuthentication = (): Authentication => {
+  class AuthenticationStub implements Authentication {
+    async auth (authentication: AuthenticationModel): Promise<string> {
+      return await new Promise(resolve => resolve('any_token'))
+    }
+  }
+  return new AuthenticationStub()
+}
 
 const makeAddAccount = (): AddAccount => {
   class AddAccountStub implements AddAccount {
@@ -49,11 +60,13 @@ const makeValidation = (): Validation => {
 const makeSUT = (): SutTypes => {
   const addAccountStub = makeAddAccount()
   const validationStub = makeValidation()
-  const sut = new SignupController(addAccountStub, validationStub)
+  const authenticationStub = makeAuthentication()
+  const sut = new SignupController(addAccountStub, validationStub, authenticationStub)
   return {
     sut,
     addAccountStub,
-    validationStub
+    validationStub,
+    authenticationStub
   }
 }
 
@@ -73,7 +86,7 @@ describe('SingUp Controller', () => {
   it('Should return 200 if valid data was passed', async () => {
     const { sut } = makeSUT()
     const httpResponse = await sut.handle(makeFakeRequest())
-    expect(httpResponse).toEqual(ok(makeFakeAccount()))
+    expect(httpResponse).toEqual(ok({accessToken: 'any_token' }))
   })
 
   it('Should call addAccount with correct values', async () => {
@@ -105,5 +118,25 @@ describe('SingUp Controller', () => {
     jest.spyOn(validationStub, 'validate').mockReturnValueOnce(new MissingParamError('missig field'))
     const httpResponse = await sut.handle(makeFakeRequest())
     expect(httpResponse).toEqual(badRequest(new MissingParamError('missig field')))
+  })
+  
+  it('Should call authentication with correct values', async () => {
+    const { sut, authenticationStub } = makeSUT()
+
+    const authenticationSpy = jest.spyOn(authenticationStub, 'auth')
+
+    const httpRequest = makeFakeRequest()
+    await sut.handle(httpRequest)
+    expect(authenticationSpy).toHaveBeenCalledWith({
+      "email": "invalid_email@mail.com",
+      "password": "any_password",
+    })
+  })
+
+  it('should return 500 if auth throws', async () => {
+    const { sut, authenticationStub } = makeSUT()
+    jest.spyOn(authenticationStub, 'auth').mockReturnValueOnce(new Promise((resolve, reject) => reject(new Error())))
+    const httpRequest = await sut.handle(makeFakeRequest())
+    expect(httpRequest).toEqual(serverError(new Error()))
   })
 })
